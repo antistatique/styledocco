@@ -205,7 +205,6 @@ var cli = function(options) {
         js: function(cb) {
           async.parallel([
             async.apply(fs.readFile, resourcesDir + 'docs.ui.js', 'utf8'),
-            async.apply(fs.readFile, resourcesDir + 'docs.previews.js', 'utf8')
           ], function(err, res) {
             if (err != null) return cb(err);
             cb(null, res.join(''));
