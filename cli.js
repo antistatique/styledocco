@@ -17,48 +17,56 @@ var version = require('./package').version;
 marked.setOptions({ sanitize: false, gfm: true });
 
 // Helper functions
-var pluck = function(arr, prop) {
-  return arr.map(function(item) { return item[prop]; });
+var pluck = function (arr, prop) {
+  return arr.map(function (item) {
+    return item[prop];
+  });
 };
 
-var isType = function(o, type) {
-    return Object.prototype.toString.call(o) === '[object ' + type + ']';
+var isType = function (o, type) {
+  return Object.prototype.toString.call(o) === '[object ' + type + ']';
 };
 
-var flatten = function(arr) {
-  return arr.reduce(function(tot, cur) {
+var flatten = function (arr) {
+  return arr.reduce(function (tot, cur) {
     return tot.concat(isArray(cur) ? flatten(cur) : cur);
   }, []);
 };
-var inArray = function(arr, str) { return arr.indexOf(str) !== -1; };
-var isArray = function(obj) { return isType(obj, 'Array'); };
-var isString = function(obj) { return isType(obj, 'String'); };
-
-var urlsRelative = function(css, path) {
-    if (isString(css) && isString(path)) {
-        path = path.indexOf('/', path.length -1) > -1? path : path + '/';
-        var regex = /(url\(["']?)(?!https?:|data:)([^/'"][\w/.]*)/gm;
-        return css.replace(regex, "$1" + path + "$2");
-    } else {
-        throw new Error('1st and 2nd args must be strings.');
-    }
+var inArray = function (arr, str) {
+  return arr.indexOf(str) !== -1;
+};
+var isArray = function (obj) {
+  return isType(obj, 'Array');
+};
+var isString = function (obj) {
+  return isType(obj, 'String');
 };
 
-var dirUp = function(steps) {
-    if ( ! steps) return '';
-    var str = '';
-    for (var i = 0; i < steps; ++i) {
-        str += '../';
-    }
-    return str;
+var urlsRelative = function (css, path) {
+  if (isString(css) && isString(path)) {
+    path = path.indexOf('/', path.length - 1) > -1 ? path : path + '/';
+    var regex = /(url\(["']?)(?!https?:|data:)([^/'"][\w/.]*)/gm;
+    return css.replace(regex, "$1" + path + "$2");
+  } else {
+    throw new Error('1st and 2nd args must be strings.');
+  }
+};
+
+var dirUp = function (steps) {
+  if (!steps) return '';
+  var str = '';
+  for (var i = 0; i < steps; ++i) {
+    str += '../';
+  }
+  return str;
 };
 
 // Get a filename without the extension
-var baseFilename = function(str) {
+var baseFilename = function (str) {
   return path.basename(str, path.extname(str)).replace(/^_/, '');
 };
 
-var basePathname = function(file, basePath) {
+var basePathname = function (file, basePath) {
   return path.join(
     path.dirname(path.relative(basePath, file) || path.basename(basePath)),
     baseFilename(file)
@@ -66,7 +74,7 @@ var basePathname = function(file, basePath) {
 };
 
 // Build an HTML file name, named by it's path relative to basePath
-var htmlFilename = function(file, basePath) {
+var htmlFilename = function (file, basePath) {
   return path.join(
     path.dirname(path.relative(basePath, file) || path.basename(basePath)),
     baseFilename(file) + '.html'
@@ -74,57 +82,65 @@ var htmlFilename = function(file, basePath) {
 };
 
 // Find first file matching `re` in `dir`.
-var findFile = function(dir, re, cb) {
-  fs.stat(dir, function(err, stat) {
-    var files = fs.readdir(dir, function(err, files) {
-      files = files.sort().filter(function(file) { return file.match(re); });
+var findFile = function (dir, re, cb) {
+  fs.stat(dir, function (err, stat) {
+    var files = fs.readdir(dir, function (err, files) {
+      files = files.sort().filter(function (file) {
+        return file.match(re);
+      });
       if (!files.length) cb(new Error('No file found.'));
       else cb(null, path.join(dir, files[0]));
     });
   });
 };
 
-var getFiles = function(inPath, cb) {
-  fs.stat(inPath, function(err, stat) {
+var getFiles = function (inPath, cb) {
+  fs.stat(inPath, function (err, stat) {
     if (err != null) return cb(err);
     if (stat.isFile()) {
       cb(null, [ inPath ]);
     } else {
       var finder = findit(inPath);
       var files = [];
-      finder.on('file', function(file) { files.push(file); });
-      finder.on('end', function() { cb(null, files); });
+      finder.on('file', function (file) {
+        files.push(file);
+      });
+      finder.on('end', function () {
+        cb(null, files);
+      });
     }
   });
 };
 
 // Make `link` objects for the menu.
-var menuLinks = function(files, basePath) {
-  return files.map(function(file) {
+var menuLinks = function (files, basePath) {
+  return files.map(function (file) {
     var parts = path.dirname(file).split('/');
     parts.shift(); // Remove base directory name
     return {
       name: baseFilename(file),
       href: htmlFilename(file, basePath),
-      directory: parts[parts.length-1] || './'
+      directory: parts[parts.length - 1] || './'
     };
   })
-  .reduce(function(links, link) {
-    if (links[link.directory] != null) {
-      links[link.directory].push(link);
-    } else {
-      links[link.directory] = [ link ];
-    }
-    return links;
-  }, {});
+    .reduce(function (links, link) {
+      if (links[link.directory] != null) {
+        links[link.directory].push(link);
+      } else {
+        links[link.directory] = [ link ];
+      }
+      return links;
+    }, {});
 };
 
-var preprocess = function(file, pp, options, cb) {
+var preprocess = function (file, pp, options, cb) {
   // stdin would have been nice here, but not all preprocessors (less)
   // accepts that, so we need to read the file both here and for the parser.
   // Don't process SASS partials.
   if (file.match(/(^|\/)_.*\.s(c|a)ss$/) != null) {
-    process.nextTick(function() { cb(null, ''); });
+    process.nextTick(function () {
+      cb(null, '');
+    });
   } else if (pp != null) {
     pp += ' ';
     pp += file;
@@ -136,19 +152,19 @@ var preprocess = function(file, pp, options, cb) {
 
     var stdout = '';
 
-    pp.on('error', function(err) {
+    pp.on('error', function (err) {
       if (err != null && options.verbose) console.error(err.message);
     });
 
-    pp.on('close', function() {
+    pp.on('close', function () {
       cb(null, stdout);
     });
 
-    pp.stderr.on('data', function(data) {
+    pp.stderr.on('data', function (data) {
       if (data.length && options.verbose) console.error(data);
     });
 
-    pp.stdout.on('data', function(data) {
+    pp.stdout.on('data', function (data) {
       stdout += data;
     });
   } else {
@@ -157,7 +173,7 @@ var preprocess = function(file, pp, options, cb) {
 };
 
 
-var cli = function(options) {
+var cli = function (options) {
 
   var errorMessages = { noFiles: 'No css files found' };
   var resourcesDir = __dirname + '/share/';
@@ -171,11 +187,14 @@ var cli = function(options) {
     '.styl': 'stylus'
   };
 
-  var log = options.verbose ? function(str) { console.log(str); }
-                            : function() {};
+  var log = options.verbose ? function (str) {
+    console.log(str);
+  }
+    : function () {
+  };
 
   // Custom error also outputing StyleDocco and Node versions.
-  var SDError = function(msg, err) {
+  var SDError = function (msg, err) {
     this.message = msg + '\n' + err.message + '\n' +
       'StyleDocco v' + version +
       ' running on Node ' + process.version + ' ' + process.platform;
@@ -189,17 +208,17 @@ var cli = function(options) {
 
   // Fetch all static resources.
   async.parallel({
-    template: function(cb) {
-      fs.readFile(resourcesDir + 'docs.jade', 'utf8', function(err, contents) {
+    template: function (cb) {
+      fs.readFile(resourcesDir + 'docs.jade', 'utf8', function (err, contents) {
         if (err != null) return cb(err);
         cb(null, jade.compile(contents));
       });
     },
-    docs: function(cb) {
+    docs: function (cb) {
       async.parallel({
         css: async.apply(fs.readFile, resourcesDir + 'docs.css', 'utf8'),
-        js: function(cb) {
-          async.parallel([async.apply(fs.readFile, resourcesDir + 'docs.ui.js', 'utf8')], function(err, res) {
+        js: function (cb) {
+          async.parallel([async.apply(fs.readFile, resourcesDir + 'docs.ui.js', 'utf8')], function (err, res) {
             if (err != null) return cb(err);
             cb(null, res.join(''));
           });
@@ -207,16 +226,16 @@ var cli = function(options) {
       }, cb);
     },
     // Extra JavaScript and CSS files to include in previews.
-    previews: function(cb) {
-      fs.readFile(resourcesDir + 'previews.js', 'utf8', function(err, js) {
+    previews: function (cb) {
+      fs.readFile(resourcesDir + 'previews.js', 'utf8', function (err, js) {
         if (err != null) return cb(err);
         var code = { js: js, css: '' };
-        var files = options.include.filter(function(file) {
+        var files = options.include.filter(function (file) {
           return inArray(['.css', '.js'], path.extname(file));
         });
-        async.filter(files, fs.exists, function(files) {
-          async.reduce(files, code, function(tot, cur, cb) {
-            fs.readFile(cur, 'utf8', function(err, contents) {
+        async.filter(files, fs.exists, function (files) {
+          async.reduce(files, code, function (tot, cur, cb) {
+            fs.readFile(cur, 'utf8', function (err, contents) {
               if (err != null) return cb(err);
               tot[path.extname(cur).slice(1)] += contents;
               cb(null, tot);
@@ -226,15 +245,15 @@ var cli = function(options) {
       });
     },
     // Find input files.
-    files: function(cb) {
-      async.reduce(options['in'], [], function(all, cur, cb) {
-        getFiles(cur, function(err, files) {
+    files: function (cb) {
+      async.reduce(options['in'], [], function (all, cur, cb) {
+        getFiles(cur, function (err, files) {
           if (err != null) return cb(err);
           cb(null, all.concat(files));
         });
-      }, function(err, files) {
+      }, function (err, files) {
         if (err != null) return cb(err);
-        files = files.filter(function(file) {
+        files = files.filter(function (file) {
           // No hidden files
           if (file.match(/(\/|^)\.[^\.\/]/)) return false;
           // Only supported file types
@@ -246,22 +265,22 @@ var cli = function(options) {
       });
     },
     // Look for a README file.
-    readme: function(cb) {
-      findFile(options.basePath, /^readme\.m(ark)?d(own)?/i, function(err, file) {
+    readme: function (cb) {
+      findFile(options.basePath, /^readme\.m(ark)?d(own)?/i, function (err, file) {
         if (file != null && err == null) return read(file);
-        findFile(process.cwd(), /^readme\.m(ark)?d(own)?/i, function(err, file) {
+        findFile(process.cwd(), /^readme\.m(ark)?d(own)?/i, function (err, file) {
           if (err != null) file = resourcesDir + 'README.md';
           read(file);
         });
       });
-      var read = function(file) {
-        fs.readFile(file, 'utf8', function(err, content) {
+      var read = function (file) {
+        fs.readFile(file, 'utf8', function (err, content) {
           if (err != null) cb(err);
           cb(null, content);
         });
       };
     }
-  }, function(err, resources) {
+  }, function (err, resources) {
     if (err != null) {
       if (err.message.indexOf(errorMessages.noFiles) > -1) {
         console.error(err);
@@ -272,46 +291,53 @@ var cli = function(options) {
     }
     var menu = menuLinks(resources.files, options.basePath);
     // Run files through preprocessor and StyleDocco parser.
-    async.map(resources.files, function(file, cb) {
+    async.map(resources.files, function (file, cb) {
       async.parallel({
         css: async.apply(preprocess, file,
-               options.preprocessor || fileTypes[path.extname(file)], options),
-        docs: function(cb) {
-          fs.readFile(file, 'utf8', function(err, code) {
+          options.preprocessor || fileTypes[path.extname(file)], options),
+        docs: function (cb) {
+          fs.readFile(file, 'utf8', function (err, code) {
             if (err != null) return cb(err);
             cb(null, styledocco(code));
           });
         }
-      }, function(err, data) {
+      }, function (err, data) {
         if (err != null) return cb(err);
         data.path = file;
         cb(null, data);
       });
-    }, function(err, files) {
+    }, function (err, files) {
       if (err != null) throw err;
       // Get the combined CSS from all files.
       var previewStyles = pluck(files, 'css').join('');
       previewStyles += resources.previews.css;
       // Build a JSON string of all files and their headings, for client side search.
-      var searchIndex = flatten(files.map(function(file) {
-        var arr = [ { title: baseFilename(file.path),
-                      filename: basePathname(file.path, options.basePath),
-                      url: htmlFilename(file.path, options.basePath) } ];
-        return arr.concat(file.docs.map(function(section) {
+      var searchIndex = flatten(files.map(function (file) {
+        var arr = [
+          { title: baseFilename(file.path),
+            filename: basePathname(file.path, options.basePath),
+            url: htmlFilename(file.path, options.basePath) }
+        ];
+        return arr.concat(file.docs.map(function (section) {
           return { title: section.title,
-                   filename: basePathname(file.path, options.basePath),
-                   url: htmlFilename(file.path, options.basePath) + '#' + section.slug };
+            filename: basePathname(file.path, options.basePath),
+            url: htmlFilename(file.path, options.basePath) + '#' + section.slug };
         }));
       }));
       searchIndex = 'var searchIndex=' + JSON.stringify(searchIndex) + ';';
-      var processJS = function(src) { return src; };
-      var processCSS = function(src) { return src; };
+      var processJS = function (src) {
+        return src;
+      };
+      var processCSS = function (src) {
+        return src;
+      };
       var docsScript = '(function(){' + searchIndex + resources.docs.js + '})();';
+
       // Render files
-      var htmlFiles = files.map(function(file) {
-      var relativePath = file.path.split('/');
-      relativePath.pop();
-      relativePath = dirUp(options.out.split('/').length) + relativePath.join('/');
+      var htmlFiles = files.map(function (file) {
+        var relativePath = file.path.split('/');
+        relativePath.pop();
+        relativePath = dirUp(options.out.split('/').length) + relativePath.join('/');
         return {
           path: file.path,
           html: resources.template({
@@ -325,12 +351,15 @@ var cli = function(options) {
           })
         };
       });
+
       // Add readme with "fake" index path.
       htmlFiles.push({
         path: path.join(options.basePath, 'index'),
         html: resources.template({
           title: '',
-          sections: styledocco.makeSections([{ docs: resources.readme, code: '' }]),
+          sections: styledocco.makeSections([
+            { docs: resources.readme, code: '' }
+          ]),
           project: { name: options.name, menu: menu },
           resources: {
             docs: { js: processJS(docsScript), css: processCSS(resources.docs.css) }
@@ -338,7 +367,7 @@ var cli = function(options) {
         })
       });
       // Write files to the output dir.
-      htmlFiles.forEach(function(file) {
+      htmlFiles.forEach(function (file) {
         var dest = path.join(options.out, htmlFilename(file.path, options.basePath));
         log('styledocco: writing ' + file.path + ' -> ' + dest);
         fs.writeFileSync(dest, file.html);
