@@ -1,7 +1,6 @@
 'use strict';
 
 var async = require('async');
-var cleancss = require('clean-css');
 var spawn = require('child_process').spawn;
 var findit = require('findit');
 var fs = require('fs');
@@ -9,7 +8,6 @@ var jade = require('jade');
 var marked = require('marked');
 var mkdirp = require('mkdirp');
 var path = require('path');
-var uglifyjs = require('uglify-js');
 var util = require('util');
 
 var styledocco = require('./styledocco');
@@ -19,8 +17,6 @@ var version = require('./package').version;
 marked.setOptions({ sanitize: false, gfm: true });
 
 // Helper functions
-var mincss = function(css) { return cleancss.process(css); };
-var minjs = uglifyjs;
 var pluck = function(arr, prop) {
   return arr.map(function(item) { return item[prop]; });
 };
@@ -203,9 +199,7 @@ var cli = function(options) {
       async.parallel({
         css: async.apply(fs.readFile, resourcesDir + 'docs.css', 'utf8'),
         js: function(cb) {
-          async.parallel([
-            async.apply(fs.readFile, resourcesDir + 'docs.ui.js', 'utf8'),
-          ], function(err, res) {
+          async.parallel([async.apply(fs.readFile, resourcesDir + 'docs.ui.js', 'utf8')], function(err, res) {
             if (err != null) return cb(err);
             cb(null, res.join(''));
           });
@@ -310,8 +304,8 @@ var cli = function(options) {
         }));
       }));
       searchIndex = 'var searchIndex=' + JSON.stringify(searchIndex) + ';';
-      var processJS = function(src) { return options.minify ? minjs(src) : src; };
-      var processCSS = function(src) { return options.minify ? mincss(src) : src; };
+      var processJS = function(src) { return src; };
+      var processCSS = function(src) { return src; };
       var docsScript = '(function(){' + searchIndex + resources.docs.js + '})();';
       // Render files
       var htmlFiles = files.map(function(file) {
