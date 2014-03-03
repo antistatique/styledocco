@@ -1,3 +1,32 @@
+(function() {
+
+'use strict';
+
+// side menu
+
+/*
+* Set navigation toggle slide
+*/
+var $button = document.getElementById("yss-show-nav");
+var $navigation = document.getElementById("yss-navigation-container");
+var $body = document.getElementsByTagName("body")[0];
+var $header = document.getElementById("yss-header");
+
+$button.addEventListener('click', function (event) {
+  var el = event.target;
+  if(!$navigation.classList.contains('yss-pulled')){
+    $navigation.classList.add('yss-pulled');
+    $header.classList.remove('yss-pushed');
+    $body.classList.remove('yss-pushed');
+  }else {
+    $navigation.classList.remove('yss-pulled');
+    $header.classList.add('yss-pushed');
+    $body.classList.add('yss-pushed');
+  }
+});
+
+})();
+
 // StyleDocco documentation user interface elements
 // ==================================================================
 // Dropdowns and search.
