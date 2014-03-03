@@ -17,8 +17,8 @@ html
       script(type="text/preview") !{resources.previews.js}
     if (resources.previews && resources.previews.css)
       style(type="text/preview") !{resources.previews.css}
-  body
-    header#yss-header.yss-header
+  body.yss-anim
+    header#yss-header.yss-header.yss-anim
       a#yss-show-nav.yss-show-nav(href='#')
         span
         span
@@ -36,7 +36,7 @@ html
             .yss-code-css
               pre: code !{section.code}
 
-    #yss-navigation-container.yss-navigation-container
+    #yss-navigation-container.yss-navigation-container.yss-pulled.yss-anim
       .yss-navigation-wrapper
         nav#yss-navigation.yss-navigation
           ul
