@@ -226,10 +226,8 @@ var cli = function (options) {
       }, cb);
     },
     // Extra JavaScript and CSS files to include in previews.
-    previews: function (cb) {
-      fs.readFile(resourcesDir + 'previews.js', 'utf8', function (err, js) {
-        if (err != null) return cb(err);
-        var code = { js: js, css: '' };
+    previews:  function (cb) {
+        var code = { js: '', css: '' };
         var files = options.include.filter(function (file) {
           return inArray(['.css', '.js'], path.extname(file));
         });
@@ -242,7 +240,6 @@ var cli = function (options) {
             });
           }, cb);
         });
-      });
     },
     // Find input files.
     files: function (cb) {
